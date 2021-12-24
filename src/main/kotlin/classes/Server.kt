@@ -5,25 +5,25 @@ import color
 import com.kotlindiscord.kord.extensions.time.TimestampType
 import com.kotlindiscord.kord.extensions.time.toDiscord
 import com.kotlindiscord.kord.extensions.utils.createdAt
-import com.mongodb.internal.connection.Time
 import dev.kord.core.entity.Guild
 import dev.kord.core.entity.Member
+import dev.kord.core.entity.channel.Channel
 import dev.kord.rest.builder.message.EmbedBuilder
 import kotlinx.datetime.Clock
-import kotlinx.datetime.toJavaInstant
-import kotlinx.datetime.toKotlinLocalDateTime
-import java.time.*
 import java.time.format.DateTimeFormatter
-import java.util.*
-import java.util.concurrent.TimeUnit
-import kotlin.math.abs
-import kotlin.time.toKotlinDuration
+
 
 data class Server(val id: String, var prefix: String = DEFAULT_PREFIX) {
 	var welcomeChannelId: String? = null
 	var welcomeEnabled = false
 	var welcomeMessage = "Welcome [member] to your new home, [server]"
 	var welcomeEmbedEnabled = false
+	val muteLog = mutableMapOf<String, String>()
+	var activeChannel: String? = null
+	val rules = mutableMapOf<Int, Rule>()
+	val rulesMessage: String? = null;
+	
+	var muteRoleId: String? = null
 	
 	val TODOList = mutableMapOf<String, List<TODO>>()
 	
@@ -57,4 +57,11 @@ data class Server(val id: String, var prefix: String = DEFAULT_PREFIX) {
 		
 		return embeds
 	}
+}
+
+private fun <K, V> Map<K, V>.swap(k: K, k1: K): Map<K, V> {
+	val temp = this.toMutableMap()
+	temp[k] = temp[k1]!!.also { temp[k1] = temp[k]!! }
+	
+	return temp.toMap()
 }

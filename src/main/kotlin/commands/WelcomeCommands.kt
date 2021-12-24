@@ -2,7 +2,10 @@ package commands
 
 import cache
 import com.kotlindiscord.kord.extensions.commands.Arguments
-import com.kotlindiscord.kord.extensions.commands.converters.impl.*
+import com.kotlindiscord.kord.extensions.commands.converters.impl.channel
+import com.kotlindiscord.kord.extensions.commands.converters.impl.defaultingBoolean
+import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalChannel
+import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalCoalescingString
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.chatGroupCommand
 import dev.kord.common.entity.Permission
@@ -12,8 +15,6 @@ import dev.kord.core.behavior.channel.MessageChannelBehavior
 import dev.kord.core.behavior.channel.createMessage
 import dev.kord.core.behavior.reply
 import dev.kord.rest.builder.message.create.allowedMentions
-import dev.kord.rest.builder.message.create.embed
-import kotlinx.serialization.json.JsonNull.content
 import update
 
 class WelcomeCommands : Extension() {
@@ -21,16 +22,6 @@ class WelcomeCommands : Extension() {
 		get() = "Welcome"
 	
 	/* Arguments */
-	class WelcomeChannelArgs : Arguments() {
-		val channel by channel("channel", "The channel to send the welcome message to")
-		val embedEnabled by defaultingBoolean("embed-enabled",
-											  "Set to true if you wanna send an embed or false for message",
-											  false)
-		val autoEnable by defaultingBoolean("auto-enable",
-											"Whether to auto-enable the welcome messages after assigning the channel",
-											true)
-	}
-	
 	class WelcomeMessageArgs : Arguments() {
 		val message by optionalCoalescingString("message", "The message to display when a new member joins.")
 	}
@@ -66,7 +57,7 @@ class WelcomeCommands : Extension() {
 					"`[server]` -> the server's name"
 				
 				action {
-					val ser = cache[guild!!.id.asString]!!
+					val ser = cache[guild!!.id.toString()]!!
 					val welcomeChannel = arguments.channel ?: message.channel.asChannel()
 					val welcomeEnabled = arguments.autoEnable
 					val welcomeMessage = arguments.message ?: ser.welcomeMessage
@@ -74,7 +65,8 @@ class WelcomeCommands : Extension() {
 					
 					ser.welcomeEnabled = welcomeEnabled
 					ser.welcomeMessage = welcomeMessage
-					ser.welcomeChannelId = welcomeChannel.id.asString
+					ser.activeChannel = welcomeChannel.id.toString()
+					ser.welcomeChannelId = ser.activeChannel
 					ser.welcomeEmbedEnabled = embedEnabled
 					
 					message.reply {
@@ -87,7 +79,8 @@ class WelcomeCommands : Extension() {
 							
 							content = "Welcome Channel: ${channel.mention}\n" +
 									  "Welcome Message Demo: ${if (!welcomeEmbedEnabled) demoMessage else "<embed>"}\n" +
-									  "Welcome Enabled: $welcomeEnabled"
+									  "Welcome Enabled: $welcomeEnabled" +
+									  "Welcome Embed Enabled: $embedEnabled"
 							
 							if (ser.welcomeEmbedEnabled) {
 								embeds.toMutableList().add(welcomeEmbed(message.getAuthorAsMember()!!,
@@ -107,7 +100,7 @@ class WelcomeCommands : Extension() {
 				description = "test the welcome command"
 				
 				action {
-					val ser = cache[guild!!.id.asString]!!
+					val ser = cache[guild!!.id.toString()]!!
 					if (ser.welcomeChannelId != null && ser.welcomeEnabled) {
 						val channel = MessageChannelBehavior(Snowflake(ser.welcomeChannelId!!), bot.getKoin().get())
 						channel.createMessage {
@@ -122,7 +115,7 @@ class WelcomeCommands : Extension() {
 						message.reply {
 							allowedMentions()
 							content =
-								"Please set a channel first by using either `${ser.prefix}welcome channel` or `${ser.prefix}welcome set`"
+								"Please set a channel first by using either `${ser.prefix}channel` or `${ser.prefix}welcome set`"
 						}
 					} else {
 						message.reply {
@@ -138,7 +131,7 @@ class WelcomeCommands : Extension() {
 				description = "reset everything to default"
 				
 				action {
-					val ser = cache[guild!!.id.asString]!!
+					val ser = cache[guild!!.id.toString()]!!
 					ser.welcomeMessage = "Welcome [member] to your new home, [server]"
 					ser.welcomeChannelId = null
 					ser.welcomeEmbedEnabled = false
@@ -158,7 +151,7 @@ class WelcomeCommands : Extension() {
 				description = "Enable the welcome messages"
 				
 				action {
-					val ser = cache[guild!!.id.asString]!!
+					val ser = cache[guild!!.id.toString()]!!
 					ser.welcomeEnabled = true
 					
 					cache[ser.id] = ser.also { update(it) }
@@ -170,7 +163,7 @@ class WelcomeCommands : Extension() {
 				description = "Disable the welcome messages"
 				
 				action {
-					val ser = cache[guild!!.id.asString]!!
+					val ser = cache[guild!!.id.toString()]!!
 					ser.welcomeEnabled = false
 					
 					cache[ser.id] = ser.also { update(it) }
@@ -182,7 +175,7 @@ class WelcomeCommands : Extension() {
 				description = "Enable/Disable the welcome embed"
 				
 				action {
-					val ser = cache[guild!!.id.asString]!!
+					val ser = cache[guild!!.id.toString()]!!
 					ser.welcomeEmbedEnabled = !ser.welcomeEmbedEnabled
 					
 					message.reply {
@@ -203,7 +196,7 @@ class WelcomeCommands : Extension() {
 					"Set your custom message to greet your newcomers.\nSpecial Syntax:\n`[member]` -> mentions the member\n`[server]` -> the server's name"
 				
 				action {
-					val ser = cache[guild!!.id.asString]!!
+					val ser = cache[guild!!.id.toString()]!!
 					val msg = arguments.message
 					message.reply {
 						allowedMentions()

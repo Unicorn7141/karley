@@ -47,7 +47,8 @@ val database = db.getCollection<Server>("Karley")
 val cache = mutableMapOf<String, Server>()
 lateinit var bot: ExtensibleBot
 var serverCount = 0
-const val VERSION = "0.3.5"
+const val VERSION = "0.4.0"
+const val BOT_ID = 915840181104414720
 lateinit var scheduler: Task
 
 @OptIn(PrivilegedIntent::class)
@@ -57,7 +58,7 @@ suspend fun main() {
 			enabled = true
 			this.defaultPrefix = DEFAULT_PREFIX
 			prefix { defaultPrefix ->
-				cache[guildId?.asString]?.prefix ?: defaultPrefix
+				cache[guildId?.toString()]?.prefix ?: defaultPrefix
 			}
 		}
 		
@@ -132,7 +133,7 @@ suspend fun main() {
 	}
 	// When bot is removed from a guild
 	bot.on<GuildDeleteEvent> {
-		val ser = cache[guildId.asString] ?: error("Guild not found")
+		val ser = cache[guildId.toString()] ?: error("Guild not found")
 		database.deleteOne(Server::id eq ser.id)
 		cache.remove(ser.id)
 		serverCount--
@@ -140,7 +141,7 @@ suspend fun main() {
 	}
 	// When member joins the guild
 	bot.on<MemberJoinEvent>() {
-		val ser = cache[guildId.asString] ?: error("Guild not found in database")
+		val ser = cache[guildId.toString()] ?: error("Guild not found in database")
 		if (ser.welcomeEnabled && ser.welcomeChannelId != null) {
 			val message = ser.welcomeMessage
 				.replace("[member]", member.mention)
@@ -191,10 +192,10 @@ fun update(ser: Server) = try {
  */
 suspend fun getOrCreate(guild: GuildBehavior): Server {
 	return try {
-		database.findOne { Server::id.eq(guild.id.asString) } ?: error("Server not found in the database")
+		database.findOne { Server::id.eq(guild.id.toString()) } ?: error("Server not found in the database")
 	} catch (e: Exception) {
 		println(e.message ?: e.stackTraceToString())
-		Server(guild.id.asString, DEFAULT_PREFIX)
+		Server(guild.id.toString(), DEFAULT_PREFIX)
 	}
 }
 

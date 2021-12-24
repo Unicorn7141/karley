@@ -47,9 +47,9 @@ class TODOCommands : Extension() {
 			description = "A simple (yet effective) TODO list"
 			
 			action {
-				val ser = cache[guild!!.id.asString]!!.also { println(it.TODOList.size) }
+				val ser = cache[guild!!.id.toString()]!!.also { println(it.TODOList.size) }
 				val member = message.getAuthorAsMember()!!
-				val TODOList = (ser.TODOList[member.id.asString] ?: emptyList())
+				val TODOList = (ser.TODOList[member.id.toString()] ?: emptyList())
 				
 				paginator(targetChannel = message.channel) {
 					var page: Page
@@ -111,20 +111,20 @@ class TODOCommands : Extension() {
 				description = "Add a new item to your TODO List"
 				
 				action {
-					val ser = cache[guild!!.id.asString]!!
+					val ser = cache[guild!!.id.toString()]!!
 					val member = message.getAuthorAsMember()!!
 					val title = arguments.name
 					val content = arguments.description
 					
-					if (!ser.TODOList.keys.contains(member.id.asString)) {
-						ser.TODOList[member.id.asString] = emptyList()
+					if (!ser.TODOList.keys.contains(member.id.toString())) {
+						ser.TODOList[member.id.toString()] = emptyList()
 					}
-					val TODOList = ser.TODOList[member.id.asString]!!.toMutableList()
+					val TODOList = ser.TODOList[member.id.toString()]!!.toMutableList()
 					TODOList.add(TODO(title, content))
 					
-					ser.TODOList[member.id.asString] = TODOList.also(::println)
+					ser.TODOList[member.id.toString()] = TODOList.also(::println)
 					cache[ser.id] = ser.also {
-						println(it.TODOList[member.id.asString])
+						println(it.TODOList[member.id.toString()])
 						update(it)
 					}
 					
@@ -150,9 +150,9 @@ class TODOCommands : Extension() {
 				description = "Get your TODO list"
 				
 				action {
-					val ser = cache[guild!!.id.asString]!!.also { println(it.TODOList.size) }
+					val ser = cache[guild!!.id.toString()]!!.also { println(it.TODOList.size) }
 					val member = message.getAuthorAsMember()!!
-					val TODOList = (ser.TODOList[member.id.asString] ?: emptyList())
+					val TODOList = (ser.TODOList[member.id.toString()] ?: emptyList())
 					
 					paginator(targetChannel = message.channel) {
 						var page: Page
@@ -213,14 +213,14 @@ class TODOCommands : Extension() {
 				description = "Remove a task from the list"
 				
 				action {
-					val ser = cache[guild!!.id.asString]!!
-					val member = message.getAuthorAsMember()!!.id.asString
+					val ser = cache[guild!!.id.toString()]!!
+					val member = message.getAuthorAsMember()!!.id.toString()
 					val tasks = (ser.TODOList[member] ?: emptyList())
 					val index = arguments.id
 					message.reply {
 						allowedMentions()
 						content = if (index - 1 in tasks.indices) {
-							val task = tasks[index-1]
+							val task = tasks[index - 1]
 							ser.TODOList[member] = tasks.filter { tasks.indexOf(it) != index - 1 }.also(::println)
 							cache[ser.id] = ser.also {
 								println(it.TODOList[member]?.size ?: 0)
@@ -240,10 +240,9 @@ class TODOCommands : Extension() {
 				description = "Edit an existing task"
 				
 				action {
-					val ser = cache[guild!!.id.asString]!!
-					val member = message.getAuthorAsMember()!!.id.asString
+					val ser = cache[guild!!.id.toString()]!!
+					val member = message.getAuthorAsMember()!!.id.toString()
 					val tasks = (ser.TODOList[member] ?: emptyList())
-					
 					val id = arguments.id
 					val value = arguments.value
 					
@@ -254,7 +253,7 @@ class TODOCommands : Extension() {
 						} else if (id - 1 !in tasks.indices) {
 							"There's no task with the id of $id"
 						} else {
-							tasks[id-1].value = value
+							tasks[id - 1].value = value
 							ser.TODOList[member] = tasks
 							cache[ser.id] = ser.also { update(it) }
 							"Edited task $id (${tasks[id - 1].name})'s content to $value"
@@ -269,10 +268,9 @@ class TODOCommands : Extension() {
 				description = "Mark a task as done"
 				
 				action {
-					val ser = cache[guild!!.id.asString]!!
-					val member = message.getAuthorAsMember()!!.id.asString
+					val ser = cache[guild!!.id.toString()]!!
+					val member = message.getAuthorAsMember()!!.id.toString()
 					val tasks = (ser.TODOList[member] ?: emptyList())
-					
 					val id = arguments.id
 					
 					message.reply {
@@ -282,7 +280,7 @@ class TODOCommands : Extension() {
 						} else if (id - 1 !in tasks.indices) {
 							"There's no task with the id of $id"
 						} else {
-							tasks[id-1].isDone = true
+							tasks[id - 1].isDone = true
 							ser.TODOList[member] = tasks
 							cache[ser.id] = ser.also { update(it) }
 							"Congrats! Task #$id (${tasks[id - 1].name}) is now completed!!"
@@ -297,10 +295,9 @@ class TODOCommands : Extension() {
 				description = "Mark a task as done and delete it"
 				
 				action {
-					val ser = cache[guild!!.id.asString]!!
-					val member = message.getAuthorAsMember()!!.id.asString
+					val ser = cache[guild!!.id.toString()]!!
+					val member = message.getAuthorAsMember()!!.id.toString()
 					val tasks = (ser.TODOList[member] ?: emptyList())
-					
 					val id = arguments.id
 					
 					message.reply {
@@ -310,7 +307,7 @@ class TODOCommands : Extension() {
 						} else if (id - 1 !in tasks.indices) {
 							"There's no task with the id of $id"
 						} else {
-							tasks[id-1].isDone = true
+							tasks[id - 1].isDone = true
 							ser.TODOList[member] = tasks.filter { tasks.indexOf(it) != (id - 1) }
 							cache[ser.id] = ser.also { update(it) }
 							"Congrats! Task #$id (${tasks[id - 1].name}) is now completed!!\n||And deleted from the list||"
