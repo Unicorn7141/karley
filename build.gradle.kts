@@ -25,9 +25,9 @@ dependencies {
     implementation("org.litote.kmongo:kmongo-reactor:4.3.0")
     implementation("org.litote.kmongo:kmongo-rxjava2:4.3.0")
     implementation("io.ktor:ktor-client-java:1.6.4")
-    implementation("com.kotlindiscord.kord.extensions:kord-extensions:+")
-    implementation("com.kotlindiscord.kord.extensions:kord-extensions:+")
-    implementation("com.kotlindiscord.kord.extensions:java-time:+")
+    implementation("com.kotlindiscord.kord.extensions:kord-extensions:1.5.1-snapshots")
+    implementation("com.kotlindiscord.kord.extensions:kord-extensions:1.5.1-snapshots")
+    implementation("com.kotlindiscord.kord.extensions:java-time:1.5.1-snapshots")
 
 }
 

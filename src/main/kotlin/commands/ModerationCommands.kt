@@ -27,6 +27,7 @@ import dev.kord.core.entity.PermissionOverwrite
 import dev.kord.rest.builder.message.create.allowedMentions
 import dev.kord.rest.builder.message.create.embed
 import icon
+import kotlinx.coroutines.NonCancellable.message
 import kotlinx.coroutines.flow.toList
 import kotlinx.datetime.Clock
 import update
@@ -77,6 +78,11 @@ class ModerationCommands : Extension() {
 		val channel by optionalChannel("channel", "Set/Get the channel for the bot to refer")
 	}
 	
+	class TimeoutArgs : Arguments() {
+		val member by member("member", "The member you'd like to timeout")
+		val minutes by int("duration in minutes", "The timeout duration in minutes")
+	}
+	
 	override suspend fun setup() {
 		chatCommand(::PrefixArgs) {
 			name = "prefix"
@@ -110,7 +116,6 @@ class ModerationCommands : Extension() {
 				}
 			}
 		}
-		
 		chatCommandCheck {
 			val author = event.message.getAuthorAsMember()!!
 			val requiredPerms = listOf(Permission.ManageGuild, Permission.BanMembers)
@@ -312,6 +317,21 @@ class ModerationCommands : Extension() {
 				ser.muteLog.remove(member.id.toString())
 				
 				cache[ser.id] = ser.also { update(it) }
+			}
+		}
+		chatCommand(::TimeoutArgs) {
+			name = "timeout"
+			description = "Put a member on a timeout"
+			
+			check {
+				val author = event.message.getAuthorAsMember()!!
+				val requiredPerms = listOf(Permission.ManageGuild, Permission.ManageRoles)
+				passIf(requiredPerms.any { author.hasPermission(it) })
+			}
+			action {
+				val target = arguments.member
+				val duration = arguments.minutes
+				
 			}
 		}
 		chatCommand(::ActiveChannelArgs) {
